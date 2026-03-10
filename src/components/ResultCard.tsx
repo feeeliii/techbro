@@ -22,26 +22,27 @@ export default function ResultCard({ answers, gender }: Props) {
     return { cat, catScore, catTotal: catQuestions.length }
   })
 
-  useEffect(() => {
-    // 1. Ergebnis speichern
+    useEffect(() => {
     supabase.from("results").insert({
-      gender_context: gender,
-      total_score: totalScore,
-      answers: answers,
+        gender_context: gender,
+        total_score: totalScore,
+        answers: answers,
+    }).then(() => {
+        // erst NACH dem Speichern laden
+        supabase
+        .from("results")
+        .select("total_score")
+        .then(({ data }) => {
+            if (data) {
+            setTotalParticipants(data.length)
+            const avg = data.reduce((a, b) => a + b.total_score, 0) / data.length
+            setAverageScore(Math.round((avg / questions.length) * 100))
+            }
+        })
     })
+    }, [])
 
-    // 2. Statistiken laden
-    supabase
-      .from("results")
-      .select("total_score")
-      .then(({ data }) => {
-        if (data) {
-          setTotalParticipants(data.length)
-          const avg = data.reduce((a, b) => a + b.total_score, 0) / data.length
-          setAverageScore(Math.round(avg))
-        }
-      })
-  }, [])
+
 
   return (
     <div className="flex flex-col items-center min-h-screen px-6 py-16 max-w-xl mx-auto">
@@ -75,7 +76,7 @@ export default function ResultCard({ answers, gender }: Props) {
       {/* Participants */}
       {totalParticipants && averageScore !== null && (
         <p className="text-gray-400 text-sm mt-8 text-center">
-          {totalParticipants} Menschen haben das Quiz gemacht – der Durchschnitt liegt bei {averageScore} / {totalQuestions}
+            {totalParticipants} Menschen haben das Quiz gemacht – der Durchschnitt liegt bei {averageScore}%
         </p>
       )}
 
