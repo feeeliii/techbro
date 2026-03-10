@@ -1,3 +1,5 @@
+import { useEffect } from "react"
+import { supabase } from "../lib/supabase"
 import type { GenderContext } from "../data/questions"
 import { questions, genderNote, categories } from "../data/questions"
 
@@ -16,6 +18,17 @@ export default function ResultCard({ answers, gender }: Props) {
     const catScore = catAnswers.reduce((a, b) => a + b, 0)
     return { cat, catScore, catTotal: catQuestions.length }
   })
+
+  useEffect(() => {
+    supabase.from("results").insert({
+        gender_context: gender,
+        total_score: totalScore,
+        answers: answers,
+    }).then(({ error }) => {
+        console.log("Supabase error:", error)
+    })
+    }, [])
+
 
   return (
     <div className="flex flex-col items-center min-h-screen px-6 py-16 max-w-xl mx-auto">
