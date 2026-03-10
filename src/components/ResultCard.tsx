@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
 import type { GenderContext } from "../data/questions"
 import { questions, genderNote, categories } from "../data/questions"
@@ -9,6 +9,9 @@ type Props = {
 }
 
 export default function ResultCard({ answers, gender }: Props) {
+  const [totalParticipants, setTotalParticipants] = useState<number | null>(null)
+  const [averageScore, setAverageScore] = useState<number | null>(null)
+
   const totalScore = answers.reduce((a, b) => a + b, 0)
   const totalQuestions = questions.length
 
@@ -20,15 +23,25 @@ export default function ResultCard({ answers, gender }: Props) {
   })
 
   useEffect(() => {
+    // 1. Ergebnis speichern
     supabase.from("results").insert({
-        gender_context: gender,
-        total_score: totalScore,
-        answers: answers,
-    }).then(({ error }) => {
-        console.log("Supabase error:", error)
+      gender_context: gender,
+      total_score: totalScore,
+      answers: answers,
     })
-    }, [])
 
+    // 2. Statistiken laden
+    supabase
+      .from("results")
+      .select("total_score")
+      .then(({ data }) => {
+        if (data) {
+          setTotalParticipants(data.length)
+          const avg = data.reduce((a, b) => a + b.total_score, 0) / data.length
+          setAverageScore(Math.round(avg))
+        }
+      })
+  }, [])
 
   return (
     <div className="flex flex-col items-center min-h-screen px-6 py-16 max-w-xl mx-auto">
@@ -59,9 +72,16 @@ export default function ResultCard({ answers, gender }: Props) {
         ))}
       </div>
 
+      {/* Participants */}
+      {totalParticipants && averageScore !== null && (
+        <p className="text-gray-400 text-sm mt-8 text-center">
+          {totalParticipants} Menschen haben das Quiz gemacht – der Durchschnitt liegt bei {averageScore} / {totalQuestions}
+        </p>
+      )}
+
       {/* Gender Note */}
       {gender && genderNote[gender] && (
-        <p className="mt-12 text-sm text-gray-400 text-center">
+        <p className="mt-6 text-sm text-gray-400 text-center">
           {genderNote[gender]}
         </p>
       )}
