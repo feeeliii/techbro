@@ -1,50 +1,52 @@
 import type { Question } from "../data/questions"
 
-
 type Props = {
-    question: Question // Question object from src/data/questions.ts
-    current: number
-    total: number
-    onAnswer: (agreed: boolean) => void
+  question: Question
+  current: number
+  total: number
+  onAnswer: (agreed: boolean) => void
+  labels?: { yes: string; no: string }
 }
 
-export default function QuestionCard({ question, current, total, onAnswer }: Props) {
-    return (
-         <div className="flex flex-col items-center justify-center min-h-screen px-6">
-      
-      {/* Progress */}
-      <p className="text-sm text-gray-400 mb-8">
-        {current} / {total}
-      </p>
-
-      {/* Question */}
-      <div className="max-w-xl w-full mb-12">
-        <p className="text-2xl font-medium text-center leading-relaxed">
-          {question.text}
+export default function QuestionCard({
+  question,
+  current,
+  total,
+  onAnswer,
+  labels = { yes: "agree", no: "disagree" },
+}: Props) {
+  return (
+    <div className="flex flex-col justify-center min-h-screen px-8 max-w-2xl mx-auto font-mono">
+      { current > 0 && (
+        <p className="text-xs text-gray-600 mb-8 uppercase tracking-widest">
+          statement {current}/{total}
         </p>
+    )}
+      <div className="mb-12">
+        <span className="text-purple-400 mr-3">›</span>
+        <span className="text-white text-xl leading-relaxed">
+          {question.text}
+        </span>
       </div>
 
-      {/* Buttons */}
-      <div className="flex gap-6">
-        <button
-          onClick={() => onAnswer(false)}
-          className="px-10 py-4 rounded-full border border-gray-400 text-gray-300 hover:bg-gray-800 transition-all"
-        >
-          Disagree
-        </button>
+      <div className="flex gap-4">
         <button
           onClick={() => onAnswer(true)}
-          className="px-10 py-4 rounded-full bg-white text-black hover:bg-gray-200 transition-all"
+          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase"
         >
-          Agree
+          [ {labels.yes} ]
+        </button>
+        <button
+          onClick={() => onAnswer(false)}
+          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase"
+        >
+          [ {labels.no} ]
         </button>
       </div>
 
-      {/* Source */}
-      <p className="mt-12 text-xs text-gray-600">
-        Source: {question.source}
+      <p className="mt-12 text-xs text-gray-700">
+        # {question.source}
       </p>
-
     </div>
-    )
+  )
 }
