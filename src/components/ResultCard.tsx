@@ -1,5 +1,3 @@
-// components/ResultCard.tsx
-
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
 import type { GenderContext } from "../data/questions"
@@ -25,6 +23,11 @@ export default function ResultCard({ answers, gender }: Props) {
   const [averageScore, setAverageScore] = useState<number | null>(null)
   const [avgByCategory, setAvgByCategory] = useState<AvgData>({})
   const [copied, setCopied] = useState(false)
+  const [verdictDistribution, setVerdictDistribution] = useState<{
+    techBro: number
+    tendencies: number
+    notTechBro: number
+  } | null>(null)
 
   const totalScore = answers.reduce((a, b) => a + b, 0)
   const totalQuestions = questions.length
@@ -57,8 +60,7 @@ export default function ResultCard({ answers, gender }: Props) {
           .then(({ data }) => {
             if (data && data.length > 0) {
               setTotalParticipants(data.length)
-              const avg =
-                data.reduce((a, b) => a + b.total_score, 0) / data.length
+              const avg = data.reduce((a, b) => a + b.total_score, 0) / data.length
               setAverageScore(Math.round((avg / questions.length) * 100))
 
               const catAvgs: AvgData = {}
@@ -76,13 +78,30 @@ export default function ResultCard({ answers, gender }: Props) {
                 catAvgs[cat] = Math.round((sum / (data.length * catTotal)) * 100)
               })
               setAvgByCategory(catAvgs)
+
+              const total = data.length
+              const techBro = data.filter(
+                (r) => (r.total_score / questions.length) * 100 > 65
+              ).length
+              const tendencies = data.filter((r) => {
+                const p = (r.total_score / questions.length) * 100
+                return p > 30 && p <= 65
+              }).length
+              const notTechBro = data.filter(
+                (r) => (r.total_score / questions.length) * 100 <= 30
+              ).length
+              setVerdictDistribution({
+                techBro: Math.round((techBro / total) * 100),
+                tendencies: Math.round((tendencies / total) * 100),
+                notTechBro: Math.round((notTechBro / total) * 100),
+              })
             }
           })
       })
   }, [])
 
   function handleShare() {
-    const text = "Am I a Tech Bro? 14 statements. Agree or Disagree. Take the quiz:"
+    const text = `Am I a Tech Bro? ${totalQuestions} statements. Agree or Disagree. Take the quiz:`
     const url = window.location.origin
 
     if (navigator.share) {
@@ -94,6 +113,13 @@ export default function ResultCard({ answers, gender }: Props) {
     }
   }
 
+  const verdictLabel =
+    percentage > 65
+      ? '"tech bro"'
+      : percentage > 30
+      ? '"tendencies"'
+      : '"not a tech bro"'
+
   return (
     <div className="flex flex-col min-h-screen px-8 py-16 max-w-2xl mx-auto font-mono">
       {/* Header */}
@@ -102,22 +128,44 @@ export default function ResultCard({ answers, gender }: Props) {
       </p>
 
       {/* Total Score */}
-      <div className="mb-2">
+      <div className="mb-4">
         <span className="text-purple-400 mr-3">›</span>
         <span className="text-white text-xl">
-          you agreed with{" "}
-          <span className="text-purple-400 font-bold">
-            {totalScore} of {totalQuestions}
-          </span>{" "}
-          statements ({percentage}%).
+          You scored{" "}
+          <span className="text-purple-400 font-bold">{percentage}%</span>.
         </span>
       </div>
 
-      {/* Comparison */}
+      {/* Verdict Label */}
+      <div className="mb-2 ml-6">
+        <span className="text-gray-300 text-sm">
+          That puts you in the {verdictLabel} range.
+        </span>
+      </div>
+
+      {/* Average Score */}
       {averageScore !== null && (
-        <p className="text-gray-500 text-sm mb-12 ml-6">
-          # the average across {totalParticipants} participants is {averageScore}%.
+        <p className="text-gray-500 text-sm mb-8 ml-6">
+          The average is {averageScore}%.
         </p>
+      )}
+
+      {/* Verdict Distribution */}
+      {verdictDistribution && totalParticipants !== null && (
+        <div className="mb-12 ml-6 font-mono text-xs flex flex-col gap-1 border-t border-gray-800 pt-4">
+          <p className="mb-2 text-gray-600 uppercase tracking-widest text-xs">
+            among {totalParticipants} participants
+          </p>
+          <p>
+            <span className="text-purple-400">{verdictDistribution.techBro}%</span> tech bro
+          </p>
+          <p>
+            <span className="text-blue-400">{verdictDistribution.tendencies}%</span> tendencies
+          </p>
+          <p>
+            <span className="text-emerald-400">{verdictDistribution.notTechBro}%</span> not a tech bro
+          </p>
+        </div>
       )}
 
       {/* Radar Chart */}

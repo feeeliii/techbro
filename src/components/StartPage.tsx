@@ -76,7 +76,7 @@ export default function StartPage({ onStart }: { onStart: () => void }) {
         className="flex flex-col items-center gap-6"
         >
         <p className="text-gray-400 text-center">
-            14 statements. Just agree or disagree.
+            18 statements. Just agree or disagree.
         </p>
         <button
             onClick={onStart}
