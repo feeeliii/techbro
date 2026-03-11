@@ -82,7 +82,7 @@ export default function ResultCard({ answers, gender }: Props) {
   }, [])
 
   function handleShare() {
-    const text = "Am I a Tech Bro? 23 statements. Agree or Disagree. Take the quiz:"
+    const text = "Am I a Tech Bro? 14 statements. Agree or Disagree. Take the quiz:"
     const url = window.location.origin
 
     if (navigator.share) {
