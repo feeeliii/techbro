@@ -9,14 +9,16 @@ export type Question = {
   text: string
   category: string
   source: string
+  reversed?: boolean
 }
 
 export const questions: Question[] = [
   // Meritocracy
   {
     id: 1,
-    text: "If you're truly talented and work hard, you'll succeed – regardless of background, gender, or race.",
+    text: "Your background, gender, and race still significantly shape your chances of success in tech – no matter how talented you are.",
     category: "Meritocracy",
+    reversed: true,
     source:
       "Noble, S. U., & Roberts, S. T. (2019). Technological elites, the meritocracy, and postracial myths in Silicon Valley. In R. Mukherjee, S. Banet-Weiser, & H. Gray (Eds.), Racism postrace (pp. 113–130). Duke University Press. https://doi.org/10.1215/9781478003250",
   },
@@ -45,8 +47,9 @@ export const questions: Question[] = [
   },
   {
     id: 5,
-    text: "Political processes are too slow – technology can drive change faster and more effectively.",
+    text: "Democratic processes may be slow, but they're how societies should make decisions – technology shouldn't bypass them.",
     category: "Techno-Solutionism",
+    reversed: true,
     source:
       "Levina, M., & Hasinoff, A. A. (2017). The Silicon Valley ethos: Tech industry products, discourses, and practices. Television & New Media, 18(6), 489–495. https://doi.org/10.1177/1527476416680454\n\nQuandt, T., & Klapproth, J. (2024). The Silicon Valley paradox: A qualitative interview study on the social, cultural, and ideological foundations of a global innovation center. Communications, 50(2), 1–21. https://doi.org/10.1515/commun-2023-0045",
   },
@@ -84,8 +87,9 @@ export const questions: Question[] = [
   },
   {
     id: 10,
-    text: "The market solves problems better than laws – bad products simply don't survive.",
+    text: "Tech platforms have become too powerful to self-regulate – we need strong public oversight.",
     category: "Cyber-Libertarianism",
+    reversed: true,
     source:
       "Golumbia, D. (2024). Cyberlibertarianism: The right-wing politics of digital technology. University of Minnesota Press.",
   },
@@ -123,8 +127,9 @@ export const questions: Question[] = [
   },
   {
     id: 15,
-    text: "If AI systems have bias, that's a technical bug, not a societal issue.",
+    text: "AI bias is a reflection of societal inequality, not just a technical problem to fix.",
     category: "Privilege Blindness",
+    reversed: true,
     source:
       "Noble, S. U. (2018). Algorithms of oppression: How search engines reinforce racism. New York University Press.",
   },
@@ -146,7 +151,7 @@ export const questions: Question[] = [
   },
   {
     id: 18,
-    text: "Mind uploading, radical life extension, and colonizing Mars are both realistic and highly desirable goals to strive for.",
+    text: "Mind uploading, radical life extension, and colonizing Mars are all realistic and highly desirable goals to strive for.",
     category: "Techno-Utopianism",
     source:
       "Gebru, T., & Torres, É. P. (2024). The TESCREAL bundle: Eugenics and the promise of utopia through artificial general intelligence. First Monday, 29(4). https://doi.org/10.5210/fm.v29i4.13636",
@@ -166,7 +171,7 @@ export const categories = [
 export type Category = (typeof categories)[number]
 
 export const categoryInfo: Record<Category, { source: string }> = {
-  Meritocracy: { source: "Noble & Roberts, 2019" },
+  Meritocracy: { source: "Noble & Roberts, 2019; Malmström et al., 2017" },
   "Techno-Solutionism": {
     source: "Levina & Hasinoff, 2017; Quandt & Klapproth, 2024",
   },
@@ -174,7 +179,7 @@ export const categoryInfo: Record<Category, { source: string }> = {
   "Cyber-Libertarianism": { source: "Golumbia, 2024" },
   "Hustle Culture": { source: "Quandt & Klapproth, 2024" },
   "Privilege Blindness": {
-    source: "Noble & Roberts, 2019; Noble, 2018; Bender et al., 2021",
+    source: "Noble & Roberts, 2019; Noble, 2018",
   },
   "Techno-Utopianism": {
     source: "Gebru & Torres, 2024; Bender et al., 2021",
@@ -184,7 +189,7 @@ export const categoryInfo: Record<Category, { source: string }> = {
 export const categoryDescriptions: Record<Category, { text: string; critique: string; source: string }> = {
   Meritocracy: {
     text: "A social system, society, or organization in which people get success or power because of their abilities, not because of their money or social position.",
-    critique: "Critics argue this belief ignores systemic barriers like racism and sexism, and legitimizes existing inequalities as 'deserved'.",
+    critique: "Critics argue this belief ignores systemic barriers like racism and sexism, and legitimizes existing inequalities as 'deserved.'",
     source: "Cambridge Dictionary",
   },
   "Techno-Solutionism": {
@@ -194,7 +199,7 @@ export const categoryDescriptions: Record<Category, { text: string; critique: st
   },
   Disruption: {
     text: "The action of completely changing the traditional way that an industry or market operates by using new methods or technology.",
-    critique: "Critics argue this narrative romanticizes destruction, ignoring the jobs lost, communities displaced, and regulations bypassed in the name of (presumed) innovation.",
+    critique: "Critics argue this narrative romanticizes destruction, ignoring the jobs lost, communities displaced, and regulations bypassed in the name of innovation.",
     source: "Cambridge Business English Dictionary",
   },
   "Cyber-Libertarianism": {

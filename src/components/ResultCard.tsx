@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
-import type { GenderContext } from "../data/questions"
-import { questions, genderNote, categories, categoryDescriptions } from "../data/questions"
-import type { Category } from "../data/questions"
+import type { GenderContext, Category } from "../data/questions"
+import {
+  questions,
+  genderNote,
+  categories,
+  categoryDescriptions,
+} from "../data/questions"
 import RadarChart from "./RadarChart"
 
 type Props = {
@@ -19,6 +23,12 @@ function getBarGradient(percentage: number): string {
   return "linear-gradient(135deg, #a78bfa, #ec4899, #f97316)"
 }
 
+function adjustAnswers(rawAnswers: number[]): number[] {
+  return questions.map((q, i) =>
+    q.reversed ? 1 - rawAnswers[i] : rawAnswers[i]
+  )
+}
+
 export default function ResultCard({ answers, gender }: Props) {
   const [totalParticipants, setTotalParticipants] = useState<number | null>(null)
   const [averageScore, setAverageScore] = useState<number | null>(null)
@@ -31,14 +41,17 @@ export default function ResultCard({ answers, gender }: Props) {
   } | null>(null)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
 
-  const totalScore = answers.reduce((a, b) => a + b, 0)
+  const adjusted = adjustAnswers(answers)
+  const totalScore = adjusted.reduce((a, b) => a + b, 0)
   const totalQuestions = questions.length
   const percentage = Math.round((totalScore / totalQuestions) * 100)
 
   const categoryScores = categories.map((cat) => {
     const catQuestions = questions.filter((q) => q.category === cat)
-    const catAnswers = catQuestions.map((q) => answers[q.id - 1])
-    const catScore = catAnswers.reduce((a, b) => a + b, 0)
+    const catScore = catQuestions.reduce(
+      (sum, q) => sum + adjusted[q.id - 1],
+      0
+    )
     return { cat, catScore, catTotal: catQuestions.length }
   })
 
@@ -62,8 +75,12 @@ export default function ResultCard({ answers, gender }: Props) {
           .then(({ data }) => {
             if (data && data.length > 0) {
               setTotalParticipants(data.length)
+
               const avg =
-                data.reduce((a, b) => a + b.total_score, 0) / data.length
+                data.reduce((a, row) => {
+                  const rowAdjusted = adjustAnswers(row.answers as number[])
+                  return a + rowAdjusted.reduce((s, v) => s + v, 0)
+                }, 0) / data.length
               setAverageScore(Math.round((avg / questions.length) * 100))
 
               const catAvgs: AvgData = {}
@@ -73,7 +90,11 @@ export default function ResultCard({ answers, gender }: Props) {
                 const sum = data.reduce((acc, row) => {
                   const rowAnswers = row.answers as number[]
                   const catScore = catQuestions.reduce(
-                    (s, q) => s + (rowAnswers[q.id - 1] ?? 0),
+                    (s, q) =>
+                      s +
+                      (q.reversed
+                        ? 1 - (rowAnswers[q.id - 1] ?? 0)
+                        : (rowAnswers[q.id - 1] ?? 0)),
                     0
                   )
                   return acc + catScore
@@ -85,15 +106,20 @@ export default function ResultCard({ answers, gender }: Props) {
               setAvgByCategory(catAvgs)
 
               const total = data.length
-              const techBro = data.filter(
-                (r) => (r.total_score / questions.length) * 100 > 65
-              ).length
+              const getScore = (row: { answers: unknown }) => {
+                const rowAdjusted = adjustAnswers(row.answers as number[])
+                return (
+                  (rowAdjusted.reduce((s, v) => s + v, 0) / questions.length) *
+                  100
+                )
+              }
+              const techBro = data.filter((r) => getScore(r) > 65).length
               const tendencies = data.filter((r) => {
-                const p = (r.total_score / questions.length) * 100
+                const p = getScore(r)
                 return p > 30 && p <= 65
               }).length
               const notTechBro = data.filter(
-                (r) => (r.total_score / questions.length) * 100 <= 30
+                (r) => getScore(r) <= 30
               ).length
               setVerdictDistribution({
                 techBro: Math.round((techBro / total) * 100),
@@ -203,7 +229,7 @@ export default function ResultCard({ answers, gender }: Props) {
                 >
                   {cat.toLowerCase()}
                   <span
-                    className="text-[20px] text-gray-400 transition-transform duration-200"
+                    className="text-[10px] text-gray-400 transition-transform duration-200"
                     style={{
                       display: "inline-block",
                       transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
@@ -212,7 +238,6 @@ export default function ResultCard({ answers, gender }: Props) {
                     ▾
                   </span>
                 </button>
-
                 <span className="text-gray-600">
                   you: {Math.round(catPercentage)}%
                   {avg !== undefined && ` · avg: ${avg}%`}
@@ -226,9 +251,7 @@ export default function ResultCard({ answers, gender }: Props) {
                     "{desc.text}"
                     <span className="text-gray-600 ml-1">— {desc.source}</span>
                   </p>
-                  <p className="text-gray-400 italic">
-                    {desc.critique}
-                  </p>
+                  <p className="text-gray-400 italic">{desc.critique}</p>
                 </div>
               )}
 
