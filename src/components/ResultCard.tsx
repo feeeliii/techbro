@@ -23,11 +23,25 @@ function getBarGradient(percentage: number): string {
   return "linear-gradient(135deg, #a78bfa, #ec4899, #f97316)"
 }
 
+function getScoreColor(percentage: number): string {
+  if (percentage <= 30) return "#34d399"
+  if (percentage <= 65) return "#a78bfa"
+  return "#ec4899"
+}
+
+function getScoreBg(percentage: number): string {
+  if (percentage <= 30) return "rgba(52,211,153,0.15)"
+  if (percentage <= 65) return "rgba(167,139,250,0.15)"
+  return "rgba(236,72,153,0.15)"
+}
+
 function adjustAnswers(rawAnswers: number[]): number[] {
   return questions.map((q, i) =>
     q.reversed ? 1 - rawAnswers[i] : rawAnswers[i]
   )
 }
+
+const PERCENT_THRESHOLD = 30
 
 export default function ResultCard({ answers, gender }: Props) {
   const [totalParticipants, setTotalParticipants] = useState<number | null>(null)
@@ -38,6 +52,9 @@ export default function ResultCard({ answers, gender }: Props) {
     techBro: number
     tendencies: number
     notTechBro: number
+    techBroAbs: number
+    tendenciesAbs: number
+    notTechBroAbs: number
   } | null>(null)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
 
@@ -113,18 +130,21 @@ export default function ResultCard({ answers, gender }: Props) {
                   100
                 )
               }
-              const techBro = data.filter((r) => getScore(r) > 65).length
-              const tendencies = data.filter((r) => {
+              const techBroAbs = data.filter((r) => getScore(r) > 65).length
+              const tendenciesAbs = data.filter((r) => {
                 const p = getScore(r)
                 return p > 30 && p <= 65
               }).length
-              const notTechBro = data.filter(
+              const notTechBroAbs = data.filter(
                 (r) => getScore(r) <= 30
               ).length
               setVerdictDistribution({
-                techBro: Math.round((techBro / total) * 100),
-                tendencies: Math.round((tendencies / total) * 100),
-                notTechBro: Math.round((notTechBro / total) * 100),
+                techBro: Math.round((techBroAbs / total) * 100),
+                tendencies: Math.round((tendenciesAbs / total) * 100),
+                notTechBro: Math.round((notTechBroAbs / total) * 100),
+                techBroAbs,
+                tendenciesAbs,
+                notTechBroAbs,
               })
             }
           })
@@ -146,75 +166,50 @@ export default function ResultCard({ answers, gender }: Props) {
 
   const verdictLabel =
     percentage > 65
-      ? '"tech bro"'
+      ? "tech bro"
       : percentage > 30
-      ? '"tendencies"'
-      : '"not a tech bro"'
+      ? "tendencies"
+      : "not a tech bro"
+
+  const usePercent =
+    totalParticipants !== null && totalParticipants >= PERCENT_THRESHOLD
 
   return (
     <div className="flex flex-col min-h-screen px-8 py-16 max-w-2xl mx-auto font-mono">
-      {/* Header */}
+      {/* ── YOUR SCORE ─────────────────────────────── */}
       <p className="text-xs text-gray-600 mb-8 uppercase tracking-widest">
-        results
+        your score
       </p>
 
-      {/* Total Score */}
-      <div className="mb-4">
+      {/* Score */}
+      <div className="mb-2">
         <span className="text-purple-400 mr-3">›</span>
         <span className="text-white text-xl">
           You scored{" "}
-          <span className="text-purple-400 font-bold">{percentage}%</span>.
+          <span
+            className="font-bold px-2 py-0.5 rounded"
+            style={{
+              color: getScoreColor(percentage),
+              backgroundColor: getScoreBg(percentage),
+            }}
+          >
+            {percentage}%
+          </span>
         </span>
       </div>
 
-      {/* Verdict Label */}
-      <div className="mb-2 ml-6">
-        <span className="text-gray-300 text-sm">
-          That puts you in the {verdictLabel} range.
-        </span>
-      </div>
-
-      {/* Average Score */}
-      {averageScore !== null && (
-        <p className="text-gray-500 text-sm mb-8 ml-6">
-          The average is {averageScore}%.
-        </p>
-      )}
-
-      {/* Verdict Distribution */}
-      {verdictDistribution && totalParticipants !== null && (
-        <div className="mb-12 ml-6 font-mono text-xs flex flex-col gap-1 border-t border-gray-800 pt-4">
-          <p className="mb-2 text-gray-600 uppercase tracking-widest text-xs">
-            among {totalParticipants} participants
-          </p>
-          <p>
-            <span className="text-purple-400">
-              {verdictDistribution.techBro}%
-            </span>{" "}
-            tech bro
-          </p>
-          <p>
-            <span className="text-blue-400">
-              {verdictDistribution.tendencies}%
-            </span>{" "}
-            tendencies
-          </p>
-          <p>
-            <span className="text-emerald-400">
-              {verdictDistribution.notTechBro}%
-            </span>{" "}
-            not a tech bro
-          </p>
-        </div>
-      )}
+      {/* Verdict */}
+      <p className="text-gray-300 text-sm ml-6 mb-10">
+        That puts you in the "{verdictLabel}" range.
+      </p>
 
       {/* Radar Chart */}
       <div className="flex justify-center mb-12">
         <RadarChart data={radarData} />
       </div>
 
-      {/* Category Breakdown with avg comparison */}
-      <div className="flex flex-col gap-6 mb-12">
+      {/* Category Breakdown */}
+      <div className="flex flex-col gap-6 mb-16">
         {categoryScores.map(({ cat, catScore, catTotal }) => {
           const catPercentage = (catScore / catTotal) * 100
           const avg = avgByCategory[cat]
@@ -229,7 +224,7 @@ export default function ResultCard({ answers, gender }: Props) {
                 >
                   {cat.toLowerCase()}
                   <span
-                    className="text-[10px] text-gray-400 transition-transform duration-200"
+                    className="text-[24px] text-gray-400 transition-transform duration-200"
                     style={{
                       display: "inline-block",
                       transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
@@ -239,12 +234,10 @@ export default function ResultCard({ answers, gender }: Props) {
                   </span>
                 </button>
                 <span className="text-gray-600">
-                  you: {Math.round(catPercentage)}%
-                  {avg !== undefined && ` · avg: ${avg}%`}
+                  {Math.round(catPercentage)}%
                 </span>
               </div>
 
-              {/* Definition Accordion */}
               {isOpen && desc && (
                 <div className="text-xs mb-3 ml-4 border-l border-gray-700 pl-3 flex flex-col gap-2">
                   <p className="text-gray-500">
@@ -275,6 +268,76 @@ export default function ResultCard({ answers, gender }: Props) {
         })}
       </div>
 
+      {/* ── EVERYONE ELSE ──────────────────────────── */}
+      {verdictDistribution && totalParticipants !== null && (
+        <div className="border-t border-gray-800 pt-8 mb-12">
+          <p className="text-xs text-gray-600 mb-6 uppercase tracking-widest">
+            everyone else · {totalParticipants} participants
+          </p>
+
+          {averageScore !== null && (
+            <p className="text-gray-400 text-sm mb-6">
+              Average score:{" "}
+              <span className="text-gray-300">{averageScore}%</span>
+            </p>
+          )}
+
+          {/* Distribution */}
+        <div className="flex flex-col gap-3">
+          {[
+            {
+              label: "tech bro",
+              pct: verdictDistribution.techBro,
+              abs: verdictDistribution.techBroAbs,
+              color: "#ec4899",
+            },
+            {
+              label: "tendencies",
+              pct: verdictDistribution.tendencies,
+              abs: verdictDistribution.tendenciesAbs,
+              color: "#a78bfa",
+            },
+            {
+              label: "not a tech bro",
+              pct: verdictDistribution.notTechBro,
+              abs: verdictDistribution.notTechBroAbs,
+              color: "#34d399",
+            },
+          ].map((v) => {
+            const barWidth = usePercent
+              ? v.pct
+              : totalParticipants
+                ? Math.round((v.abs / totalParticipants) * 100)
+                : 0
+
+            return (
+              <div key={v.label} className="flex items-center gap-3">
+                <span
+                  className="text-sm w-10 text-right tabular-nums"
+                  style={{ color: v.color }}
+                >
+                  {usePercent ? `${v.pct}%` : v.abs}
+                </span>
+                <div className="flex-1 bg-gray-900 h-1.5">
+                  <div
+                    className="h-1.5 transition-all"
+                    style={{
+                      width: `${barWidth}%`,
+                      background: v.color,
+                      opacity: 0.7,
+                    }}
+                  />
+                </div>
+                <span className="text-gray-500 text-xs w-24">
+                  {v.label}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+      )}
+
       {/* Gender Note */}
       {gender && genderNote[gender] && (
         <p className="text-xs text-gray-500 border-l-2 border-purple-900 pl-4 mb-8">
@@ -286,13 +349,13 @@ export default function ResultCard({ answers, gender }: Props) {
       <div className="flex gap-4">
         <button
           onClick={handleShare}
-          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase"
+          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase whitespace-nowrap"
         >
-          {copied ? "[ copied! ]" : "[ share quiz ]"}
+          {copied ? "[ copied! ]" : "[ share ]"}
         </button>
         <button
           onClick={() => window.location.reload()}
-          className="px-8 py-3 border border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 transition-all text-sm tracking-widest uppercase"
+          className="px-8 py-3 border border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 transition-all text-sm tracking-widest uppercase whitespace-nowrap"
         >
           [ restart ]
         </button>

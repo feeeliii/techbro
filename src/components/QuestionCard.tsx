@@ -32,13 +32,13 @@ export default function QuestionCard({
       <div className="flex gap-4">
         <button
           onClick={() => onAnswer(true)}
-          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase"
+          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase whitespace-nowrap"
         >
           [ {labels.yes} ]
         </button>
         <button
           onClick={() => onAnswer(false)}
-          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase"
+          className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase whitespace-nowrap"
         >
           [ {labels.no} ]
         </button>
