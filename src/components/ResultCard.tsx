@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabase"
 import type { GenderContext } from "../data/questions"
-import { questions, genderNote, categories } from "../data/questions"
+import { questions, genderNote, categories, categoryDescriptions } from "../data/questions"
+import type { Category } from "../data/questions"
 import RadarChart from "./RadarChart"
 
 type Props = {
@@ -28,6 +29,7 @@ export default function ResultCard({ answers, gender }: Props) {
     tendencies: number
     notTechBro: number
   } | null>(null)
+  const [openCategory, setOpenCategory] = useState<string | null>(null)
 
   const totalScore = answers.reduce((a, b) => a + b, 0)
   const totalQuestions = questions.length
@@ -60,7 +62,8 @@ export default function ResultCard({ answers, gender }: Props) {
           .then(({ data }) => {
             if (data && data.length > 0) {
               setTotalParticipants(data.length)
-              const avg = data.reduce((a, b) => a + b.total_score, 0) / data.length
+              const avg =
+                data.reduce((a, b) => a + b.total_score, 0) / data.length
               setAverageScore(Math.round((avg / questions.length) * 100))
 
               const catAvgs: AvgData = {}
@@ -75,7 +78,9 @@ export default function ResultCard({ answers, gender }: Props) {
                   )
                   return acc + catScore
                 }, 0)
-                catAvgs[cat] = Math.round((sum / (data.length * catTotal)) * 100)
+                catAvgs[cat] = Math.round(
+                  (sum / (data.length * catTotal)) * 100
+                )
               })
               setAvgByCategory(catAvgs)
 
@@ -157,13 +162,22 @@ export default function ResultCard({ answers, gender }: Props) {
             among {totalParticipants} participants
           </p>
           <p>
-            <span className="text-purple-400">{verdictDistribution.techBro}%</span> tech bro
+            <span className="text-purple-400">
+              {verdictDistribution.techBro}%
+            </span>{" "}
+            tech bro
           </p>
           <p>
-            <span className="text-blue-400">{verdictDistribution.tendencies}%</span> tendencies
+            <span className="text-blue-400">
+              {verdictDistribution.tendencies}%
+            </span>{" "}
+            tendencies
           </p>
           <p>
-            <span className="text-emerald-400">{verdictDistribution.notTechBro}%</span> not a tech bro
+            <span className="text-emerald-400">
+              {verdictDistribution.notTechBro}%
+            </span>{" "}
+            not a tech bro
           </p>
         </div>
       )}
@@ -178,15 +192,46 @@ export default function ResultCard({ answers, gender }: Props) {
         {categoryScores.map(({ cat, catScore, catTotal }) => {
           const catPercentage = (catScore / catTotal) * 100
           const avg = avgByCategory[cat]
+          const isOpen = openCategory === cat
+          const desc = categoryDescriptions[cat as Category]
           return (
             <div key={cat}>
               <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-400">{cat.toLowerCase()}</span>
+                <button
+                  onClick={() => setOpenCategory(isOpen ? null : cat)}
+                  className="flex items-center gap-2 text-gray-400 hover:text-gray-200 transition-colors text-left"
+                >
+                  {cat.toLowerCase()}
+                  <span
+                    className="text-[20px] text-gray-400 transition-transform duration-200"
+                    style={{
+                      display: "inline-block",
+                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                    }}
+                  >
+                    ▾
+                  </span>
+                </button>
+
                 <span className="text-gray-600">
                   you: {Math.round(catPercentage)}%
                   {avg !== undefined && ` · avg: ${avg}%`}
                 </span>
               </div>
+
+              {/* Definition Accordion */}
+              {isOpen && desc && (
+                <div className="text-xs mb-3 ml-4 border-l border-gray-700 pl-3 flex flex-col gap-2">
+                  <p className="text-gray-500">
+                    "{desc.text}"
+                    <span className="text-gray-600 ml-1">— {desc.source}</span>
+                  </p>
+                  <p className="text-gray-400 italic">
+                    {desc.critique}
+                  </p>
+                </div>
+              )}
+
               <div className="relative w-full bg-gray-900 h-1.5">
                 {avg !== undefined && (
                   <div

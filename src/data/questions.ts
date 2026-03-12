@@ -181,6 +181,44 @@ export const categoryInfo: Record<Category, { source: string }> = {
   },
 }
 
+export const categoryDescriptions: Record<Category, { text: string; critique: string; source: string }> = {
+  Meritocracy: {
+    text: "A social system, society, or organization in which people get success or power because of their abilities, not because of their money or social position.",
+    critique: "Critics argue this belief ignores systemic barriers like racism and sexism, and legitimizes existing inequalities as 'deserved'.",
+    source: "Cambridge Dictionary",
+  },
+  "Techno-Solutionism": {
+    text: "An ideology that recasts complex social phenomena like politics, public health, education, and law enforcement as neatly defined problems with definite, computable solutions.",
+    critique: "Critics argue this oversimplifies deeply human problems and ignores the political, cultural, and ethical dimensions that no algorithm can resolve.",
+    source: "Evgeny Morozov, To Save Everything, Click Here (2013)",
+  },
+  Disruption: {
+    text: "The action of completely changing the traditional way that an industry or market operates by using new methods or technology.",
+    critique: "Critics argue this narrative romanticizes destruction, ignoring the jobs lost, communities displaced, and regulations bypassed in the name of (presumed) innovation.",
+    source: "Cambridge Business English Dictionary",
+  },
+  "Cyber-Libertarianism": {
+    text: "A political ideology that focuses on minimizing government regulation, censorship, or anything else in the way of a 'free' World Wide Web.",
+    critique: "Critics argue this 'freedom' primarily benefits powerful tech corporations, while concealing inequality, disinformation, and concentrations of wealth beneath a utopian veneer.",
+    source: "Wikipedia, Technolibertarianism",
+  },
+  "Hustle Culture": {
+    text: "The glorification of working very long hours in hope of reaching one's professional goals while having a disregard for their health.",
+    critique: "Critics argue this mindset normalizes exploitation and burnout, disproportionately benefiting employers while framing self-destruction as ambition.",
+    source: "Urban Dictionary",
+  },
+  "Privilege Blindness": {
+    text: "Privilege is characteristically invisible to people who have it. People in dominant groups often believe that they have earned the privileges that they enjoy or that everyone could have access to these privileges if only they worked to earn them.",
+    critique: "This invisibility allows dominant groups to attribute their success solely to merit, while overlooking the systemic advantages that made it possible.",
+    source: "Ivey Business Journal",
+  },
+  "Techno-Utopianism": {
+    text: "Any ideology based on the premise that advances in science and technology could and should bring about a utopia, or at least help to fulfill one or another utopian ideal.",
+    critique: "Critics argue this dismisses the real harms technology causes today — like algorithmic discrimination — in favor of speculative futures that mostly benefit those already in power.",
+    source: "Wikipedia, Technological utopianism",
+  },
+}
+
 export const genderNote: Record<GenderContext, string> = {
   man: "",
   "not-man":
