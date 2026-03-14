@@ -9,6 +9,10 @@ import {
 } from "../data/questions"
 import RadarChart from "./RadarChart"
 
+// ── Shared thresholds ─────────────────────────────────────────
+export const THRESHOLD_LOW = 30
+export const THRESHOLD_HIGH = 65
+
 type Props = {
   answers: number[]
   gender: GenderContext | null
@@ -18,20 +22,20 @@ type AvgData = Record<string, number>
 
 function getBarGradient(percentage: number): string {
   if (percentage === 0) return "rgba(255,255,255,0.1)"
-  if (percentage <= 33) return "linear-gradient(135deg, #34d399, #60a5fa)"
-  if (percentage <= 66) return "linear-gradient(135deg, #60a5fa, #a78bfa)"
+  if (percentage <= THRESHOLD_LOW) return "linear-gradient(135deg, #34d399, #60a5fa)"
+  if (percentage <= THRESHOLD_HIGH) return "linear-gradient(135deg, #60a5fa, #a78bfa)"
   return "linear-gradient(135deg, #a78bfa, #ec4899, #f97316)"
 }
 
 function getScoreColor(percentage: number): string {
-  if (percentage <= 30) return "#34d399"
-  if (percentage <= 65) return "#a78bfa"
+  if (percentage <= THRESHOLD_LOW) return "#34d399"
+  if (percentage <= THRESHOLD_HIGH) return "#a78bfa"
   return "#ec4899"
 }
 
 function getScoreBg(percentage: number): string {
-  if (percentage <= 30) return "rgba(52,211,153,0.15)"
-  if (percentage <= 65) return "rgba(167,139,250,0.15)"
+  if (percentage <= THRESHOLD_LOW) return "rgba(52,211,153,0.15)"
+  if (percentage <= THRESHOLD_HIGH) return "rgba(167,139,250,0.15)"
   return "rgba(236,72,153,0.15)"
 }
 
@@ -130,13 +134,13 @@ export default function ResultCard({ answers, gender }: Props) {
                   100
                 )
               }
-              const techBroAbs = data.filter((r) => getScore(r) > 65).length
+              const techBroAbs = data.filter((r) => getScore(r) > THRESHOLD_HIGH).length
               const tendenciesAbs = data.filter((r) => {
                 const p = getScore(r)
-                return p > 30 && p <= 65
+                return p > THRESHOLD_LOW && p <= THRESHOLD_HIGH
               }).length
               const notTechBroAbs = data.filter(
-                (r) => getScore(r) <= 30
+                (r) => getScore(r) <= THRESHOLD_LOW
               ).length
               setVerdictDistribution({
                 techBro: Math.round((techBroAbs / total) * 100),
@@ -165,9 +169,9 @@ export default function ResultCard({ answers, gender }: Props) {
   }
 
   const verdictLabel =
-    percentage > 65
+    percentage > THRESHOLD_HIGH
       ? "tech bro"
-      : percentage > 30
+      : percentage > THRESHOLD_LOW
       ? "tendencies"
       : "not a tech bro"
 
@@ -176,7 +180,7 @@ export default function ResultCard({ answers, gender }: Props) {
 
   return (
     <div className="flex flex-col min-h-screen px-8 py-16 max-w-2xl mx-auto font-mono">
-      {/* ── YOUR SCORE ─────────────────────────────── */}
+      {/* ── YOUR SCORE ──*/}
       <p className="text-xs text-gray-600 mb-8 uppercase tracking-widest">
         your score
       </p>
@@ -202,6 +206,13 @@ export default function ResultCard({ answers, gender }: Props) {
       <p className="text-gray-300 text-sm ml-6 mb-10">
         That puts you in the "{verdictLabel}" range.
       </p>
+
+      {/* Gender Note */}
+      {gender && genderNote[gender] && (
+        <p className="text-xs text-gray-500 border-l-2 border-purple-900 pl-4 mb-8">
+          {genderNote[gender]}
+        </p>
+      )}
 
       {/* Radar Chart */}
       <div className="flex justify-center mb-12">
@@ -283,66 +294,59 @@ export default function ResultCard({ answers, gender }: Props) {
           )}
 
           {/* Distribution */}
-        <div className="flex flex-col gap-3">
-          {[
-            {
-              label: "tech bro",
-              pct: verdictDistribution.techBro,
-              abs: verdictDistribution.techBroAbs,
-              color: "#ec4899",
-            },
-            {
-              label: "tendencies",
-              pct: verdictDistribution.tendencies,
-              abs: verdictDistribution.tendenciesAbs,
-              color: "#a78bfa",
-            },
-            {
-              label: "not a tech bro",
-              pct: verdictDistribution.notTechBro,
-              abs: verdictDistribution.notTechBroAbs,
-              color: "#34d399",
-            },
-          ].map((v) => {
-            const barWidth = usePercent
-              ? v.pct
-              : totalParticipants
-                ? Math.round((v.abs / totalParticipants) * 100)
-                : 0
+          <div className="flex flex-col gap-3">
+            {[
+              {
+                label: "tech bro",
+                pct: verdictDistribution.techBro,
+                abs: verdictDistribution.techBroAbs,
+                color: "#ec4899",
+              },
+              {
+                label: "tendencies",
+                pct: verdictDistribution.tendencies,
+                abs: verdictDistribution.tendenciesAbs,
+                color: "#a78bfa",
+              },
+              {
+                label: "not a tech bro",
+                pct: verdictDistribution.notTechBro,
+                abs: verdictDistribution.notTechBroAbs,
+                color: "#34d399",
+              },
+            ].map((v) => {
+              const barWidth = usePercent
+                ? v.pct
+                : totalParticipants
+                  ? Math.round((v.abs / totalParticipants) * 100)
+                  : 0
 
-            return (
-              <div key={v.label} className="flex items-center gap-3">
-                <span
-                  className="text-sm w-10 text-right tabular-nums"
-                  style={{ color: v.color }}
-                >
-                  {usePercent ? `${v.pct}%` : v.abs}
-                </span>
-                <div className="flex-1 bg-gray-900 h-1.5">
-                  <div
-                    className="h-1.5 transition-all"
-                    style={{
-                      width: `${barWidth}%`,
-                      background: v.color,
-                      opacity: 0.7,
-                    }}
-                  />
+              return (
+                <div key={v.label} className="flex items-center gap-3">
+                  <span
+                    className="text-sm w-10 text-right tabular-nums"
+                    style={{ color: v.color }}
+                  >
+                    {usePercent ? `${v.pct}%` : v.abs}
+                  </span>
+                  <div className="flex-1 bg-gray-900 h-1.5">
+                    <div
+                      className="h-1.5 transition-all"
+                      style={{
+                        width: `${barWidth}%`,
+                        background: v.color,
+                        opacity: 0.7,
+                      }}
+                    />
+                  </div>
+                  <span className="text-gray-500 text-xs w-24">
+                    {v.label}
+                  </span>
                 </div>
-                <span className="text-gray-500 text-xs w-24">
-                  {v.label}
-                </span>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-      </div>
-      )}
-
-      {/* Gender Note */}
-      {gender && genderNote[gender] && (
-        <p className="text-xs text-gray-500 border-l-2 border-purple-900 pl-4 mb-8">
-          {genderNote[gender]}
-        </p>
       )}
 
       {/* Actions */}

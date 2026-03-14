@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { THRESHOLD_LOW, THRESHOLD_HIGH } from "./ResultCard"
 
 const gradients = [
   "linear-gradient(135deg, #a78bfa, #ec4899, #f97316)",
@@ -12,13 +13,13 @@ type Verdict = {
 }
 
 function getVerdict(percentage: number): Verdict {
-  if (percentage <= 30) {
+  if (percentage <= THRESHOLD_LOW) {
     return {
       words: ["You", "are", "not", "a", "Tech", "Bro."],
       gradient: gradients[2],
     }
   }
-  if (percentage <= 65) {
+  if (percentage <= THRESHOLD_HIGH) {
     return {
       words: ["Tech", "Bro", "tendencies."],
       gradient: gradients[1],
@@ -117,25 +118,25 @@ export default function RevealScreen({ percentage, onContinue }: Props) {
           {percentage}% agreement with tech bro ideas.
         </p>
         <button
-            onClick={handleContinue}
-            className="mt-8 flex flex-col items-center gap-3 text-purple-400 hover:text-purple-300 transition-colors p-6"
-            >
-            <span className="text-sm font-mono tracking-widest uppercase">
-                see breakdown
-            </span>
-            <svg
-                width="40"
-                height="40"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="animate-bounce"
-            >
-                <polyline points="6 9 12 15 18 9" />
-            </svg>
+          onClick={handleContinue}
+          className="mt-8 flex flex-col items-center gap-3 text-purple-400 hover:text-purple-300 transition-colors p-6"
+        >
+          <span className="text-sm font-mono tracking-widest uppercase">
+            see breakdown
+          </span>
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="animate-bounce"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </button>
       </div>
     </div>
