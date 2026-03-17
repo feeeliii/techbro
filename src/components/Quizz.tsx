@@ -15,7 +15,10 @@ export default function Quiz() {
   const [current, setCurrent] = useState(0)
   const [resultEntering, setResultEntering] = useState(true)
 
-  const totalScore = answers.reduce((a, b) => a + b, 0)
+  const adjusted = questions.map((q, i) =>
+    q.reversed ? 1 - (answers[i] ?? 0) : (answers[i] ?? 0)
+  )
+  const totalScore = adjusted.reduce((a, b) => a + b, 0)
   const percentage = Math.round((totalScore / questions.length) * 100)
 
   function handleGender(agreed: boolean) {
@@ -37,7 +40,6 @@ export default function Quiz() {
   function handleRevealDone() {
     setResultEntering(true)
     setStep("result")
-    // Trigger slide-in after mount
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         setResultEntering(false)
@@ -47,13 +49,13 @@ export default function Quiz() {
 
   if (step === "gender") {
     return (
-        <QuestionCard
+      <QuestionCard
         question={{ id: 0, text: genderQuestion.text, category: "", source: "" }}
         current={0}
         total={questions.length}
         onAnswer={handleGender}
         labels={{ yes: "yes", no: "no" }}
-        />
+      />
     )
   }
 
