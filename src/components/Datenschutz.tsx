@@ -117,40 +117,12 @@ export default function Datenschutz() {
               </li>
             </ul>
             <p className="mt-3">
-              Es werden <span className="text-white">keine</span> Namen,
-              E-Mail-Adressen, IP-Adressen oder sonstige personenbezogenen
-              Daten in der Datenbank gespeichert. Die gespeicherten Daten sind
+              Die gespeicherten Daten sind
               vollständig anonymisiert und können keiner Einzelperson
               zugeordnet werden.
             </p>
-            <p className="mt-2">
-              Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
-              Interesse an der Auswertung anonymisierter Ergebnisse).
-            </p>
-            <p className="mt-2">
-              Datenschutzhinweise von Supabase:{" "}
-              <a
-                href="https://supabase.com/privacy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-purple-400 hover:underline"
-              >
-                supabase.com/privacy
-              </a>
-            </p>
           </section>
 
-          {/* Cookies */}
-          <section>
-            <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">
-              5. cookies & tracking
-            </p>
-            <p>
-              Diese Website verwendet{" "}
-              <span className="text-white">keine Cookies</span> und{" "}
-              <span className="text-white">keine Tracking- oder Analytics-Tools</span>.
-            </p>
-          </section>
 
           {/* Rechte */}
           <section>
