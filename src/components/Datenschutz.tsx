@@ -117,17 +117,15 @@ export default function Datenschutz() {
               </li>
             </ul>
             <p className="mt-3">
-              Die gespeicherten Daten sind
-              vollständig anonymisiert und können keiner Einzelperson
-              zugeordnet werden.
+              Die gespeicherten Daten sind vollständig anonymisiert und können
+              keiner Einzelperson zugeordnet werden.
             </p>
           </section>
-
 
           {/* Rechte */}
           <section>
             <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">
-              6. ihre rechte
+              5. ihre rechte
             </p>
             <p>
               Da keine personenbezogenen Daten gespeichert werden, die Ihnen
@@ -155,14 +153,6 @@ export default function Datenschutz() {
               </a>
               ).
             </p>
-          </section>
-
-          {/* Stand */}
-          <section>
-            <p className="text-gray-600 text-xs uppercase tracking-widest mb-2">
-              7. stand
-            </p>
-            <p>März 2026</p>
           </section>
         </div>
 
