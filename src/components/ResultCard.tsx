@@ -213,40 +213,42 @@ export default function ResultCard({ answers, gender }: Props) {
     <div className="flex flex-col min-h-screen px-8 py-16 max-w-2xl mx-auto font-mono">
 
       {/* Verstecktes div nur für Screenshot */}
-      <div
-        ref={shareRef}
-        style={{
-          position: "absolute",
-          left: "-9999px",
-          padding: "24px",
-          background: "#111",
-          width: "600px",
-        }}
-      >
-        <p style={{ color: "#9ca3af", fontSize: "0.875rem", marginBottom: "32px", textTransform: "uppercase", letterSpacing: "0.1em" }}>
-          your score
-        </p>
-        <div style={{ marginBottom: "8px" }}>
-          <span style={{ color: "#a78bfa", marginRight: "12px" }}>›</span>
-          <span style={{ color: "#fff", fontSize: "1.25rem" }}>
-            You scored{" "}
-            <span style={{ color: getScoreColor(percentage), backgroundColor: getScoreBg(percentage), fontWeight: "bold", padding: "2px 8px", borderRadius: "4px" }}>
-              {percentage}%
-            </span>
+    <div
+      ref={shareRef}
+      style={{
+        position: "absolute",
+        left: "-9999px",
+        padding: "32px",
+        background: "#111",
+        width: "700px",
+        fontFamily: "monospace",
+      }}
+    >
+      <p style={{ color: "#9ca3af", fontSize: "1rem", marginBottom: "24px", textTransform: "uppercase", letterSpacing: "0.15em" }}>
+        your score
+      </p>
+      <div style={{ marginBottom: "12px" }}>
+        <span style={{ color: "#a78bfa", marginRight: "14px", fontSize: "1.5rem" }}>›</span>
+        <span style={{ color: "#fff", fontSize: "1.75rem" }}>
+          You scored{" "}
+          <span style={{ color: getScoreColor(percentage), backgroundColor: getScoreBg(percentage), fontWeight: "bold", padding: "4px 12px", borderRadius: "6px" }}>
+            {percentage}%
           </span>
-        </div>
-        <p style={{ color: "#d1d5db", fontSize: "0.875rem", marginLeft: "24px", marginBottom: "40px" }}>
-          That puts you in the "{verdictLabel}" range.
-        </p>
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: "48px" }}>
-          <RadarChart data={radarData} />
-        </div>
-        {averageScore !== null && totalParticipants !== null && (
-          <p style={{ color: "#9ca3af", fontSize: "0.75rem", textAlign: "center" }}>
-            Average score of {totalParticipants} participants: {averageScore}%
-          </p>
-        )}
+        </span>
       </div>
+      <p style={{ color: "#d1d5db", fontSize: "1.1rem", marginLeft: "28px", marginBottom: "48px" }}>
+        That puts you in the "{verdictLabel}" range.
+      </p>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: "48px" }}>
+        <RadarChart data={radarData} />
+      </div>
+      {averageScore !== null && totalParticipants !== null && (
+        <p style={{ color: "#9ca3af", fontSize: "1rem", textAlign: "center" }}>
+          Average score of {totalParticipants} participants: {averageScore}%
+        </p>
+      )}
+    </div>
+
 
       {/* ── YOUR SCORE ──*/}
       <p className="text-xs text-gray-600 mb-8 uppercase tracking-widest">
