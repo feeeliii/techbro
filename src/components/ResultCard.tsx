@@ -170,6 +170,8 @@ export default function ResultCard({ answers, gender }: Props) {
   }, [])
 
   async function handleShare() {
+    supabase.from("share_clicks").insert({ percentage }).then()
+    
     const text = `I scored ${percentage}% on the Tech Bro Assessment. Verdict: ${verdictLabel}. Take the quiz:`
     const url = window.location.origin
 
