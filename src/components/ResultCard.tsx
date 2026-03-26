@@ -83,7 +83,7 @@ export default function ResultCard({ answers, gender }: Props) {
     value: catScore / catTotal,
   }))
 
-  const scoreRef = useRef<HTMLDivElement>(null)
+  const shareRef = useRef<HTMLDivElement>(null)
 
   const verdictLabel =
     percentage > THRESHOLD_HIGH
@@ -170,90 +170,125 @@ export default function ResultCard({ answers, gender }: Props) {
   }, [])
 
   async function handleShare() {
-  const text = `I scored ${percentage}% on the Tech Bro Assessment. Verdict: ${verdictLabel}. Take the quiz:`
-  const url = window.location.origin
+    const text = `I scored ${percentage}% on the Tech Bro Assessment. Verdict: ${verdictLabel}. Take the quiz:`
+    const url = window.location.origin
 
-  // Mobil: Screenshot + native Share
-  if (navigator.share && scoreRef.current) {
-    try {
-      const canvas = await html2canvas(scoreRef.current, {
-        backgroundColor: "#0a0a0a",
-        scale: 2,
-      })
+    if (navigator.share && shareRef.current) {
+      try {
+        const canvas = await html2canvas(shareRef.current, {
+          backgroundColor: "#111",
+          scale: 2,
+        })
 
-      const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve, "image/png")
-      )
+        const blob = await new Promise<Blob | null>((resolve) =>
+          canvas.toBlob(resolve, "image/png")
+        )
 
-      if (blob) {
-        const file = new File([blob], "tech-bro-result.png", { type: "image/png" })
+        if (blob) {
+          const file = new File([blob], "tech-bro-result.png", { type: "image/png" })
 
-        if (navigator.canShare?.({ files: [file] })) {
-          await navigator.share({ title: "Am I a Tech Bro?", text, url, files: [file] })
-          return
+          if (navigator.canShare?.({ files: [file] })) {
+            await navigator.share({ title: "Am I a Tech Bro?", text, url, files: [file] })
+            return
+          }
         }
-      }
 
-      await navigator.share({ title: "Am I a Tech Bro?", text, url })
-      return
+        await navigator.share({ title: "Am I a Tech Bro?", text, url })
+        return
+      } catch {
+        // user cancelled or share failed, fall through to clipboard
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${text} ${url}`)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     } catch {
-      // user cancelled or share failed, fall through to clipboard
+      // clipboard failed silently
     }
   }
 
-  // Desktop: einfach Text kopieren
-  try {
-    await navigator.clipboard.writeText(`${text} ${url}`)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  } catch {
-    // clipboard failed silently
-  }
-}
-
-
   return (
     <div className="flex flex-col min-h-screen px-8 py-16 max-w-2xl mx-auto font-mono">
-      {/* ── YOUR SCORE ──*/}
-      <div ref={scoreRef} style={{ padding: "24px", background: "#111" }}>
-        <p className="text-sm mb-8 uppercase tracking-widest" style={{ color: "#9ca3af" }}>
+
+      {/* Verstecktes div nur für Screenshot */}
+      <div
+        ref={shareRef}
+        style={{
+          position: "absolute",
+          left: "-9999px",
+          padding: "24px",
+          background: "#111",
+          width: "600px",
+        }}
+      >
+        <p style={{ color: "#9ca3af", fontSize: "0.875rem", marginBottom: "32px", textTransform: "uppercase", letterSpacing: "0.1em" }}>
           your score
         </p>
-
-        <div className="mb-2">
+        <div style={{ marginBottom: "8px" }}>
           <span style={{ color: "#a78bfa", marginRight: "12px" }}>›</span>
           <span style={{ color: "#fff", fontSize: "1.25rem" }}>
             You scored{" "}
-            <span
-              className="font-bold px-2 py-0.5 rounded"
-              style={{
-                color: getScoreColor(percentage),
-                backgroundColor: getScoreBg(percentage),
-              }}
-            >
+            <span style={{ color: getScoreColor(percentage), backgroundColor: getScoreBg(percentage), fontWeight: "bold", padding: "2px 8px", borderRadius: "4px" }}>
               {percentage}%
             </span>
           </span>
         </div>
-
         <p style={{ color: "#d1d5db", fontSize: "0.875rem", marginLeft: "24px", marginBottom: "40px" }}>
           That puts you in the "{verdictLabel}" range.
         </p>
-
-        {gender && genderNote[gender] && (
-          <p style={{ color: "#9ca3af", fontSize: "0.75rem", borderLeft: "2px solid #581c87", paddingLeft: "16px", marginBottom: "32px" }}>
-            {genderNote[gender]}
-          </p>
-        )}
-
-        <div className="flex justify-center mb-12">
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: "48px" }}>
           <RadarChart data={radarData} />
         </div>
+        {averageScore !== null && totalParticipants !== null && (
+          <p style={{ color: "#9ca3af", fontSize: "0.75rem", textAlign: "center" }}>
+            Average score of {totalParticipants} participants: {averageScore}%
+          </p>
+        )}
       </div>
 
+      {/* ── YOUR SCORE ──*/}
+      <p className="text-xs text-gray-600 mb-8 uppercase tracking-widest">
+        your score
+      </p>
+
+      {/* Score */}
+      <div className="mb-2">
+        <span className="text-purple-400 mr-3">›</span>
+        <span className="text-white text-xl">
+          You scored{" "}
+          <span
+            className="font-bold px-2 py-0.5 rounded"
+            style={{
+              color: getScoreColor(percentage),
+              backgroundColor: getScoreBg(percentage),
+            }}
+          >
+            {percentage}%
+          </span>
+        </span>
+      </div>
+
+      {/* Verdict */}
+      <p className="text-gray-300 text-sm ml-6 mb-10">
+        That puts you in the "{verdictLabel}" range.
+      </p>
+
+      {/* Gender Note */}
+      {gender && genderNote[gender] && (
+        <p className="text-xs text-gray-500 border-l-2 border-purple-900 pl-4 mb-8">
+          {genderNote[gender]}
+        </p>
+      )}
+
+      {/* Radar Chart */}
+      <div className="flex justify-center mb-12">
+        <RadarChart data={radarData} />
+      </div>
 
       {/* Category Breakdown */}
-      <div className="flex flex-col gap-6 mt-8 mb-16">
+      <div className="flex flex-col gap-6 mb-16">
         {categoryScores.map(({ cat, catScore, catTotal }) => {
           const catPercentage = (catScore / catTotal) * 100
           const avg = avgByCategory[cat]
