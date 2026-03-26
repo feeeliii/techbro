@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react"
+import { useState, useEffect, useRef } from "react"
+import html2canvas from "html2canvas-pro"
 import { supabase } from "../lib/supabase"
 import type { GenderContext, Category } from "../data/questions"
 import {
@@ -82,6 +83,18 @@ export default function ResultCard({ answers, gender }: Props) {
     value: catScore / catTotal,
   }))
 
+  const scoreRef = useRef<HTMLDivElement>(null)
+
+  const verdictLabel =
+    percentage > THRESHOLD_HIGH
+      ? "tech bro"
+      : percentage > THRESHOLD_LOW
+      ? "tendencies"
+      : "not a tech bro"
+
+  const usePercent =
+    totalParticipants !== null && totalParticipants >= PERCENT_THRESHOLD
+
   useEffect(() => {
     supabase
       .from("results")
@@ -156,72 +169,94 @@ export default function ResultCard({ answers, gender }: Props) {
       })
   }, [])
 
-  function handleShare() {
-    const text = `Am I a Tech Bro? ${totalQuestions} statements. Agree or Disagree. Take the quiz:`
-    const url = window.location.origin
+  async function handleShare() {
+  const text = `I scored ${percentage}% on the Tech Bro Assessment. Verdict: ${verdictLabel}. Take the quiz:`
+  const url = window.location.origin
 
-    if (navigator.share) {
-      navigator.share({ title: "Am I a Tech Bro?", text, url })
-    } else {
-      navigator.clipboard.writeText(`${text} ${url}`)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+  // Mobil: Screenshot + native Share
+  if (navigator.share && scoreRef.current) {
+    try {
+      const canvas = await html2canvas(scoreRef.current, {
+        backgroundColor: "#0a0a0a",
+        scale: 2,
+      })
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/png")
+      )
+
+      if (blob) {
+        const file = new File([blob], "tech-bro-result.png", { type: "image/png" })
+
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ title: "Am I a Tech Bro?", text, url, files: [file] })
+          return
+        }
+      }
+
+      await navigator.share({ title: "Am I a Tech Bro?", text, url })
+      return
+    } catch {
+      // user cancelled or share failed, fall through to clipboard
     }
   }
 
-  const verdictLabel =
-    percentage > THRESHOLD_HIGH
-      ? "tech bro"
-      : percentage > THRESHOLD_LOW
-      ? "tendencies"
-      : "not a tech bro"
+  // Desktop: einfach Text kopieren
+  try {
+    await navigator.clipboard.writeText(`${text} ${url}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  } catch {
+    // clipboard failed silently
+  }
+}
 
-  const usePercent =
-    totalParticipants !== null && totalParticipants >= PERCENT_THRESHOLD
 
   return (
     <div className="flex flex-col min-h-screen px-8 py-16 max-w-2xl mx-auto font-mono">
       {/* ── YOUR SCORE ──*/}
-      <p className="text-xs text-gray-600 mb-8 uppercase tracking-widest">
-        your score
-      </p>
-
-      {/* Score */}
-      <div className="mb-2">
-        <span className="text-purple-400 mr-3">›</span>
-        <span className="text-white text-xl">
-          You scored{" "}
-          <span
-            className="font-bold px-2 py-0.5 rounded"
-            style={{
-              color: getScoreColor(percentage),
-              backgroundColor: getScoreBg(percentage),
-            }}
-          >
-            {percentage}%
-          </span>
-        </span>
-      </div>
-
-      {/* Verdict */}
-      <p className="text-gray-300 text-sm ml-6 mb-10">
-        That puts you in the "{verdictLabel}" range.
-      </p>
-
-      {/* Gender Note */}
-      {gender && genderNote[gender] && (
-        <p className="text-xs text-gray-500 border-l-2 border-purple-900 pl-4 mb-8">
-          {genderNote[gender]}
+      <div ref={scoreRef} style={{ padding: "16px", background: "#0a0a0a" }}>
+        <p className="text-xs text-gray-600 mb-8 uppercase tracking-widest">
+          your score
         </p>
-      )}
 
-      {/* Radar Chart */}
-      <div className="flex justify-center mb-12">
-        <RadarChart data={radarData} />
+        {/* Score */}
+        <div className="mb-2">
+          <span className="text-purple-400 mr-3">›</span>
+          <span className="text-white text-xl">
+            You scored{" "}
+            <span
+              className="font-bold px-2 py-0.5 rounded"
+              style={{
+                color: getScoreColor(percentage),
+                backgroundColor: getScoreBg(percentage),
+              }}
+            >
+              {percentage}%
+            </span>
+          </span>
+        </div>
+
+        {/* Verdict */}
+        <p className="text-gray-300 text-sm ml-6 mb-10">
+          That puts you in the "{verdictLabel}" range.
+        </p>
+
+        {/* Gender Note */}
+        {gender && genderNote[gender] && (
+          <p className="text-xs text-gray-500 border-l-2 border-purple-900 pl-4 mb-8">
+            {genderNote[gender]}
+          </p>
+        )}
+
+        {/* Radar Chart */}
+        <div className="flex justify-center mb-12">
+          <RadarChart data={radarData} />
+        </div>
       </div>
 
       {/* Category Breakdown */}
-      <div className="flex flex-col gap-6 mb-16">
+      <div className="flex flex-col gap-6 mt-8 mb-16">
         {categoryScores.map(({ cat, catScore, catTotal }) => {
           const catPercentage = (catScore / catTotal) * 100
           const avg = avgByCategory[cat]
@@ -351,7 +386,6 @@ export default function ResultCard({ answers, gender }: Props) {
       )}
 
       {/* Actions */}
-
       <div className="flex gap-4 flex-wrap">
         <button
           onClick={handleShare}
@@ -367,8 +401,6 @@ export default function ResultCard({ answers, gender }: Props) {
           [ restart ]
         </button>
       </div>
-
     </div>
-    
   )
 }

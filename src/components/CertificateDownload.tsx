@@ -118,16 +118,20 @@ export default function CertificateDownload({ percentage, verdictLabel }: Props)
     doc.setTextColor(100, 100, 100)
     doc.text(`Issued on ${today}`, cx, 155, { align: "center" })
 
-    // ── Footer ──
+        // ── Footer ──
     doc.setFontSize(7)
     doc.setTextColor(60, 60, 60)
     doc.text(
       "This certificate is 100% legitimate and should definitely be added to your LinkedIn profile.",
       cx, 175, { align: "center" }
     )
-    doc.text("amiatechbro.com", cx, 180, { align: "center" })
+    doc.setFontSize(12)
+    doc.setTextColor(236, 72, 153)
+    doc.setFont("helvetica", "bold")
+    doc.text("amIaTechBro.com", cx, 182, { align: "center" })
 
     doc.save("tech-bro-certificate.pdf")
+
   }
 
   return (
