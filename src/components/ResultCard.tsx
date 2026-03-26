@@ -8,6 +8,7 @@ import {
   categoryDescriptions,
 } from "../data/questions"
 import RadarChart from "./RadarChart"
+import CertificateDownload from "./CertificateDownload"
 
 // ── Shared thresholds ─────────────────────────────────────────
 export const THRESHOLD_LOW = 30
@@ -350,13 +351,15 @@ export default function ResultCard({ answers, gender }: Props) {
       )}
 
       {/* Actions */}
-      <div className="flex gap-4">
+
+      <div className="flex gap-4 flex-wrap">
         <button
           onClick={handleShare}
           className="px-8 py-3 border border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all text-sm tracking-widest uppercase whitespace-nowrap"
         >
           {copied ? "[ copied! ]" : "[ share ]"}
         </button>
+        <CertificateDownload percentage={percentage} verdictLabel={verdictLabel} />
         <button
           onClick={() => window.location.reload()}
           className="px-8 py-3 border border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300 transition-all text-sm tracking-widest uppercase whitespace-nowrap"
@@ -364,6 +367,8 @@ export default function ResultCard({ answers, gender }: Props) {
           [ restart ]
         </button>
       </div>
+
     </div>
+    
   )
 }
