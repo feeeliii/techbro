@@ -119,24 +119,9 @@ export default function RevealScreen({ percentage, onContinue }: Props) {
         </p>
         <button
           onClick={handleContinue}
-          className="mt-8 flex flex-col items-center gap-3 text-purple-400 hover:text-purple-300 transition-colors p-6"
+          className="mt-8 px-8 py-4 border-2 border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-black transition-all font-mono tracking-widest uppercase text-lg"
         >
-          <span className="text-sm font-mono tracking-widest uppercase">
-            see breakdown
-          </span>
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="animate-bounce"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
+          [ see breakdown → ]
         </button>
       </div>
     </div>
