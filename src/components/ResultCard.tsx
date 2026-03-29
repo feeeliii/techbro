@@ -106,10 +106,12 @@ export default function ResultCard({ answers, gender }: Props) {
       .then(() => {
         supabase
           .from("results")
-          .select("total_score, answers")
-          .then(({ data }) => {
+          .select("total_score, answers", { count: "exact" })
+          .range(0, 9999)
+          .then(({ data, count }) => {
+            console.log("data length:", data?.length, "count:", count)
             if (data && data.length > 0) {
-              setTotalParticipants(data.length)
+              setTotalParticipants(count ?? data.length)
 
               const avg =
                 data.reduce((a, row) => {
@@ -168,6 +170,7 @@ export default function ResultCard({ answers, gender }: Props) {
           })
       })
   }, [])
+
 
   async function handleShare() {
     supabase.from("share_clicks").insert({ percentage }).then()
