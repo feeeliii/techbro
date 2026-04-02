@@ -1,7 +1,7 @@
 export type GenderContext = "man" | "not-man"
 
 export const genderQuestion = {
-  text: "I am a man.",
+  text: "I am male.",
 }
 
 export type Question = {
